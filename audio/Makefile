@@ -8,5 +8,5 @@ markonaboat_downsampled.wav: markonaboat.wav
 	sox $< -c 1 -b 8 -r 8000 $@
 
 # _shortened created from _downsampled by trimming in Audacity.
-sounddata.h: markonaboat_shortened.wav
+sounddata.h: captain_obvious.wav
 	python2 audio2huff.py --sndfile=$< --hdrfile=$@ --bits=8
