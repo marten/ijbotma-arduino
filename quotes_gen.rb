@@ -15,18 +15,11 @@ puts '#include <avr/pgmspace.h>'
 puts ''
 
 count = 0
-CSV.new(STDIN).each do |row|
-  puts "static char const SUBJECT_#{count}[] PROGMEM = #{c_string row[0]};"
-  puts "static char const QUOTE_#{count}[] PROGMEM = #{c_string row[1]};"
+STDIN.each do |line|
+  line.chomp!
+  puts "static char const QUOTE_#{count}[] PROGMEM = #{c_string line};"
   count += 1
 end
-puts ''
-
-print 'char const *const SUBJECTS[] PROGMEM = { '
-count.times do |i|
-  print "SUBJECT_#{i}, "
-end
-puts '};'
 puts ''
 
 print 'char const *const QUOTES[] PROGMEM = { '

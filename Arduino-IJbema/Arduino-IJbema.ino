@@ -3,9 +3,6 @@
 #include <avr/pgmspace.h>
 #include <LiquidCrystal.h>
 
-static char const SUBJECT_PREFIX[] PROGMEM = "Mark over ";
-static char const SUBJECT_SUFFIX[] PROGMEM = ":";
-
 namespace {
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
@@ -25,26 +22,14 @@ void shiftLeft(char *buffer, int length) {
 }
 
 void showRandomQuote() {
-  
   int quoteIndex = random(NUM_QUOTES);
-  char const *subject = (char const *) pgm_read_word_near(SUBJECTS + quoteIndex);
   char const *quote = (char const *) pgm_read_word_near(QUOTES + quoteIndex);
-  
-  char buffer[LCD_WIDTH + 1];
-  char *end = buffer + LCD_WIDTH;
-  char *write = buffer;
-  write += strlcpy_P(buffer, SUBJECT_PREFIX, LCD_WIDTH);
-  if (end - write > 0) {
-    write += strlcpy_P(write, subject, end - write);
-  }
-  if (end - write > 0) {
-    write += strlcpy_P(write, SUBJECT_SUFFIX, LCD_WIDTH);
-  }
   
   lcd.clear();
   lcd.home();
-  lcd.print(buffer);
-  
+  lcd.print(F("Mark zou zeggen:"));
+
+  char buffer[LCD_WIDTH + 1];
   fillWithSpaces(buffer, LCD_WIDTH);
   while (char c = pgm_read_byte_near(quote)) {
     shiftLeft(buffer, LCD_WIDTH);
