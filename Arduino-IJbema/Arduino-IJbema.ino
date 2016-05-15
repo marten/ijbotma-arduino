@@ -1,4 +1,5 @@
 #include "quotes.h"
+#include "decompress.h"
 
 #include <avr/pgmspace.h>
 #include <LiquidCrystal.h>
@@ -31,7 +32,8 @@ void showRandomQuote() {
 
   char buffer[LCD_WIDTH + 1];
   fillWithSpaces(buffer, LCD_WIDTH);
-  while (char c = pgm_read_byte_near(quote)) {
+  Decompressor dec(quote);
+  while (char c = dec.getNext()) {
     shiftLeft(buffer, LCD_WIDTH);
     buffer[LCD_WIDTH - 1] = c;
     
