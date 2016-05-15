@@ -19,8 +19,13 @@ void showRandomQuote() {
   
   lcd.home();
   lcd.print("Mark zou zeggen:");
-  
-  char const *quote = QUOTES[random(NUM_QUOTES)];
+
+  int quoteIndex = random(NUM_QUOTES);
+  Serial.print("Selected quote ");
+  Serial.print(quoteIndex);
+  Serial.print(" out of ");
+  Serial.print(NUM_QUOTES);
+  char const *quote = QUOTES[quoteIndex][0];
   int quoteLength = strlen(quote);
   for (int scrollOffset = -16; scrollOffset <= quoteLength; scrollOffset++) {
     char buffer[LCD_WIDTH + 1];
