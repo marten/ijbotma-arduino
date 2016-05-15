@@ -81,8 +81,11 @@ ISR(TIMER2_COMPA_vect)
 {
   unsigned long pos = datapos;
   
-  // at end of sample, restart from zero, looping the sound
-  if(pos >= sounddata_bits) pos = 0;
+  // at end of sample, reset
+  if(pos >= sounddata_bits) {
+    pos = 0;
+    stopPlayback();
+  }
     
   int dif = decode(pos,huffman);
   current += dif; // add differential
