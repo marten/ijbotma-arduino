@@ -55,7 +55,7 @@ void showRandomQuote() {
   lcd.setCursor(0, 0);
   for (int i = 0; i < LCD_WIDTH; i++) {
     lcd.print(' ');
-    delay(50);
+    delay(20);
   }
   
   lcd.clear();
