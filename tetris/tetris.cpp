@@ -1,6 +1,6 @@
 #include "tetris.h"
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 using namespace std;
 
@@ -11,7 +11,7 @@ unsigned const NUM_ROTATIONS = 4;
 // http://tetris.wikia.com/wiki/SRS
 // Note that these appear mirrored because bits are enumerated from high to low,
 // while our coordinate system numbers columns sensibly from left to right.
-// Columns are numbered bottom up in both systems though.
+// Columns are numbered bottom up in both systems, so any needed padding has been added in the top row.
 Shape const SHAPES[NUM_TETROMINOS][NUM_ROTATIONS] = {
   // I
   {
@@ -22,47 +22,57 @@ Shape const SHAPES[NUM_TETROMINOS][NUM_ROTATIONS] = {
   },
   // J
   {
-    0b0001011100000000,
-    0b0110001000100000,
-    0b0000111001000000,
-    0b0010001000110000,
+    0b0000000101110000,
+    0b0000011000100010,
+    0b0000000011100100,
+    0b0000001000100011,
   },
   // L
   {
-    0b0100011100000000,
-    0b0010001001100000,
-    0b0000011100010000,
-    0b0011001000100000,
+    0b0000010001110000,
+    0b0000001000100110,
+    0b0000000001110001,
+    0b0000001100100010,
   },
   // O
   {
-    0b0110011000000000,
-    0b0110011000000000,
-    0b0110011000000000,
-    0b0110011000000000,
+    0b0000011001100000,
+    0b0000011001100000,
+    0b0000011001100000,
+    0b0000011001100000,
   },
   // S
   {
-    0b0110001100000000,
-    0b0010011001000000,
     0b0000011000110000,
-    0b0001001100100000,
+    0b0000001001100100,
+    0b0000000001100011,
+    0b0000000100110010,
   },
   // T
   {
-    0b0010011100000000,
-    0b0010011000100000,
-    0b0000011100100000,
-    0b0010001100100000,
+    0b0000001001110000,
+    0b0000001001100010,
+    0b0000000001110010,
+    0b0000001000110010,
   },
   // Z
   {
-    0b0011011000000000,
-    0b0100011000100000,
     0b0000001101100000,
-    0b0010001100010000,
+    0b0000010001100010,
+    0b0000000000110110,
+    0b0000001000110001,
   },
 };
+
+Row getShapeRow(Shape shape, uint8_t row) {
+  return (shape >> (4 * row)) & 0b1111;
+}
+
+bool getShapePixel(Shape shape, uint8_t row, uint8_t col) {
+  return shape & (1 << (4 * row + col));
+}
+
+uint8_t FILL_TICKS_PER_ROW = 6;
 
 } // namespace
 
@@ -95,7 +105,8 @@ void Bag::shuffle() {
 Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls)
 :
   numRows(numVisibleRowsWithoutFloor + 3),
-  numCols(numColsWithoutWalls + 2)
+  numCols(numColsWithoutWalls + 2),
+  state(State::PLAYING)
 {
   Row full = (1 << numCols) - 1;
   Row walls = 1 | (1 << (numCols - 1));
@@ -107,41 +118,95 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls)
   spawn();
 }
 
-void Tetris::tick() {
-  ticksUntilFall--;
-  if (ticksUntilFall == 0) {
-    currentRow--;
-    if (isBlocked()) {
-      currentRow++;
-      // TODO lock delay
-      // TODO line clear
-      spawn();
-    }
+bool Tetris::tick() {
+  bool change = false;
+
+  switch (state) {
+    case State::PLAYING:
+      ticksUntilFall--;
+      if (ticksUntilFall == 0) {
+        change = true;
+        ticksUntilFall = fallInterval();
+        currentRow--;
+        if (isBlocked()) {
+          currentRow++;
+          // TODO lock delay
+          lock();
+          // TODO line clear
+          spawn();
+        }
+      }
+      break;
+
+    case State::FILLING:
+      stateTicksRemaining--;
+      if (stateTicksRemaining % FILL_TICKS_PER_ROW == 0) {
+        change = true;
+        rows[numRows - 1 - stateTicksRemaining / FILL_TICKS_PER_ROW] = (1 << numCols) - 1;
+      }
+      if (stateTicksRemaining == 0) {
+        state = State::GAME_OVER;
+      }
+      break;
   }
+
+  return change;
+}
+
+uint8_t Tetris::getNumRows() const {
+  return numRows - 2;
+}
+
+uint8_t Tetris::getNumCols() const {
+  return numCols;
+}
+
+bool Tetris::getPixel(uint8_t row, uint8_t col) const {
+  if (rows[row] & (1 << col)) return true;
+  if (row < currentRow || row >= currentRow + 4) return false;
+  if (col < currentCol || col >= currentCol + 4) return false;
+  return getShapePixel(getCurrentShape(), row - currentRow, col - currentCol);
+}
+
+bool Tetris::isGameOver() {
+  return state == State::GAME_OVER;
 }
 
 void Tetris::spawn() {
   currentTetromino = bag.getNext();
 
-  currentRow = numRows - 1;
+  currentRow = numRows - 4;
   currentCol = numCols / 2 - 2;
   currentRotation = 0;
   ticksUntilFall = fallInterval();
 
   if (isBlocked()) {
-    // TODO trigger game over
+    state = State::FILLING;
+    stateTicksRemaining = numRows * FILL_TICKS_PER_ROW + 1;
   }
 }
 
-uint8_t Tetris::fallInterval() {
-  return 60; // TODO increase with level
+void Tetris::lock() {
+  Shape shape = getCurrentShape();
+  for (uint8_t row = 0; row < 4; row++) {
+    Row shapeRow = getShapeRow(shape, row) << currentCol;
+    rows[currentRow + row] |= shapeRow;
+  }
 }
 
-bool Tetris::isBlocked() {
-  Shape shape = SHAPES[currentTetromino][currentRotation];
-  for (uint8_t i = 0; i < 4; i++) {
-    Row shapeRow = ((shape >> (4*i)) & 0b1111) << currentCol;
-    if (rows[currentRow + i] & shapeRow) {
+Shape Tetris::getCurrentShape() const {
+  return SHAPES[currentTetromino][currentRotation];
+}
+
+uint8_t Tetris::fallInterval() const {
+  return 20; // TODO increase with level
+}
+
+bool Tetris::isBlocked() const {
+  Shape shape = getCurrentShape();
+  for (uint8_t row = 0; row < 4; row++) {
+    Row shapeRow = getShapeRow(shape, row) << currentCol;
+    if (rows[currentRow + row] & shapeRow) {
       return true;
     }
   }
