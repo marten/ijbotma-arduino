@@ -114,7 +114,8 @@ class Tetris {
     void spawn();
     void drawTetromino();
     void eraseTetromino();
-    bool move(int8_t delta);
+    bool move(int8_t direction);
+    bool rotate(int8_t direction);
     bool isBlocked() const;
     Shape getCurrentShape() const;
     uint8_t fallInterval() const;

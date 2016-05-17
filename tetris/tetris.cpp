@@ -74,6 +74,7 @@ bool getShapePixel(Shape shape, uint8_t row, uint8_t col) {
 
 uint8_t const FILL_TICKS_PER_ROW = 6;
 uint8_t const MOVE_INTERVAL = 10;
+uint8_t const ROTATE_INTERVAL = 30;
 
 } // namespace
 
@@ -140,14 +141,23 @@ bool Tetris::tick() {
 bool Tetris::tickPlaying() {
   bool change = false;
 
-  uint8_t moveDelta = 0;
+  int8_t rotateDirection = 0;
+  if (buttons & TetrisButtons::ROTATE_LEFT) {
+    rotateDirection -= 1;
+  }
+  if (buttons & TetrisButtons::ROTATE_RIGHT) {
+    rotateDirection += 1;
+  }
+  change |= rotate(rotateDirection);
+
+  int8_t moveDirection = 0;
   if (buttons & TetrisButtons::MOVE_LEFT) {
-    moveDelta -= 1;
+    moveDirection -= 1;
   }
   if (buttons & TetrisButtons::MOVE_RIGHT) {
-    moveDelta += 1;
+    moveDirection += 1;
   }
-  change |= move(moveDelta);
+  change |= move(moveDirection);
 
   ticksUntilFall--;
   if (ticksUntilFall == 0) {
@@ -214,7 +224,11 @@ void Tetris::spawn() {
   }
 }
 
-bool Tetris::move(int8_t delta) {
+bool Tetris::move(int8_t direction) {
+  if (!direction) {
+    moveCooldown = 0;
+    return false;
+  }
   if (moveCooldown) {
     moveCooldown--;
     return false;
@@ -222,12 +236,35 @@ bool Tetris::move(int8_t delta) {
 
   bool change = false;
   eraseTetromino();
-  currentCol += delta;
+  currentCol += direction;
   if (!isBlocked()) {
     moveCooldown = MOVE_INTERVAL;
     change = true;
   } else {
-    currentCol -= delta;
+    currentCol -= direction;
+  }
+  drawTetromino();
+  return change;
+}
+
+bool Tetris::rotate(int8_t direction) {
+  if (!direction) {
+    rotateCooldown = 0;
+    return false;
+  }
+  if (rotateCooldown) {
+    rotateCooldown--;
+    return false;
+  }
+
+  bool change = false;
+  eraseTetromino();
+  currentRotation = (currentRotation + 4 + direction) % 4;
+  if (!isBlocked()) {
+    rotateCooldown = ROTATE_INTERVAL;
+    change = true;
+  } else {
+    currentRotation = (currentRotation + 4 - direction) % 4;
   }
   drawTetromino();
   return change;
@@ -238,7 +275,7 @@ Shape Tetris::getCurrentShape() const {
 }
 
 uint8_t Tetris::fallInterval() const {
-  return 20; // TODO increase with level
+  return 40; // TODO increase with level
 }
 
 void Tetris::drawTetromino() {
