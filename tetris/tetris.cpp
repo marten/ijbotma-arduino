@@ -24,7 +24,7 @@ Shape const SHAPES[NUM_TETROMINOS][NUM_ROTATIONS] = {
   {
     0b0000000101110000,
     0b0000011000100010,
-    0b0000000011100100,
+    0b0000000011100010,
     0b0000001000100011,
   },
   // L
@@ -75,6 +75,7 @@ bool getShapePixel(Shape shape, uint8_t row, uint8_t col) {
 uint8_t const FILL_TICKS_PER_ROW = 6;
 uint8_t const MOVE_INTERVAL = 10;
 uint8_t const ROTATE_INTERVAL = 30;
+uint8_t const SCORE_MULTIPLIERS[4] = {1, 2, 7, 30};
 
 } // namespace
 
@@ -171,7 +172,7 @@ bool Tetris::tickPlaying() {
       currentRow++;
       drawTetromino();
       // TODO lock delay
-      // TODO line clear
+      clearLines();
       spawn();
     }
   }
@@ -268,6 +269,33 @@ bool Tetris::rotate(int8_t direction) {
   }
   drawTetromino();
   return change;
+}
+
+void Tetris::clearLines() {
+  uint8_t count = 0;
+  for (uint8_t row = 1; row < numRows; row++) {
+    if (isLine(row)) {
+      clearRow(row);
+      row--;
+      count++;
+    }
+  }
+  if (count > 0) {
+    lines += count;
+    score += SCORE_MULTIPLIERS[count] * getLevel();
+  }
+}
+
+bool Tetris::isLine(uint8_t row) const {
+  uint8_t lineMask = (1 << (numCols - 1)) - 2;
+  return (rows[row] & lineMask) == lineMask;
+}
+
+void Tetris::clearRow(uint8_t row) {
+  for (row++; row < numRows; row++) {
+    rows[row - 1] = rows[row]; 
+  }
+  rows[numRows - 1] = (1 << (numCols - 1)) | 1;
 }
 
 Shape Tetris::getCurrentShape() const {

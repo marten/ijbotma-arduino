@@ -122,6 +122,9 @@ class Tetris {
     void eraseTetromino();
     bool move(int8_t direction);
     bool rotate(int8_t direction);
+    void clearLines();
+    bool isLine(uint8_t row) const;
+    void clearRow(uint8_t row);
     bool isBlocked() const;
     Shape getCurrentShape() const;
     uint8_t fallInterval() const;
