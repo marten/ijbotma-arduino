@@ -39,7 +39,7 @@ class Tetris {
     /**
      * Standard Tetris is 20 visible rows, 10 columns.
      */
-    Tetris(uint8_t numVisibleRows, uint8_t numCols);
+    void begin(uint8_t numVisibleRows, uint8_t numCols);
 
     /**
      * Call this 60 times per second. Returns true if something changed.
@@ -83,7 +83,8 @@ class Tetris {
     uint8_t stateTicksRemaining;
 
     void spawn();
-    void lock();
+    void drawTetromino();
+    void eraseTetromino();
     bool isBlocked() const;
     Shape getCurrentShape() const;
     uint8_t fallInterval() const;

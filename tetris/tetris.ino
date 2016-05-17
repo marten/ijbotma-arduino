@@ -5,7 +5,7 @@
 #include <LiquidCrystal.h>
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-Tetris tetris(15, 10);
+Tetris tetris;
 TetrisRenderer tetrisRenderer(tetris, lcd);
 
 void setup() {
@@ -16,6 +16,8 @@ void setup() {
   pinMode(8, INPUT);
   pinMode(9, INPUT);
 
+  randomSeed(analogRead(0));
+  tetris.begin(15, 10);
   tetrisRenderer.begin();
   tetrisRenderer.render();
 }

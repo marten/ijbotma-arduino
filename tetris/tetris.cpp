@@ -102,12 +102,11 @@ void Bag::shuffle() {
   }
 }
 
-Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls)
-:
-  numRows(numVisibleRowsWithoutFloor + 3),
-  numCols(numColsWithoutWalls + 2),
-  state(State::PLAYING)
-{
+void Tetris::begin(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls) {
+  numRows = numVisibleRowsWithoutFloor + 3;
+  numCols = numColsWithoutWalls + 2;
+  state = State::PLAYING;
+
   Row full = (1 << numCols) - 1;
   Row walls = 1 | (1 << (numCols - 1));
   rows[0] = full;
@@ -127,11 +126,14 @@ bool Tetris::tick() {
       if (ticksUntilFall == 0) {
         change = true;
         ticksUntilFall = fallInterval();
+        eraseTetromino();
         currentRow--;
-        if (isBlocked()) {
+        if (!isBlocked()) {
+          drawTetromino();
+        } else {
           currentRow++;
+          drawTetromino();
           // TODO lock delay
-          lock();
           // TODO line clear
           spawn();
         }
@@ -162,10 +164,7 @@ uint8_t Tetris::getNumCols() const {
 }
 
 bool Tetris::getPixel(uint8_t row, uint8_t col) const {
-  if (rows[row] & (1 << col)) return true;
-  if (row < currentRow || row >= currentRow + 4) return false;
-  if (col < currentCol || col >= currentCol + 4) return false;
-  return getShapePixel(getCurrentShape(), row - currentRow, col - currentCol);
+  return rows[row] & (1 << col);
 }
 
 bool Tetris::isGameOver() {
@@ -180,17 +179,11 @@ void Tetris::spawn() {
   currentRotation = 0;
   ticksUntilFall = fallInterval();
 
-  if (isBlocked()) {
+  if (!isBlocked()) {
+    drawTetromino();
+  } else {
     state = State::FILLING;
     stateTicksRemaining = numRows * FILL_TICKS_PER_ROW + 1;
-  }
-}
-
-void Tetris::lock() {
-  Shape shape = getCurrentShape();
-  for (uint8_t row = 0; row < 4; row++) {
-    Row shapeRow = getShapeRow(shape, row) << currentCol;
-    rows[currentRow + row] |= shapeRow;
   }
 }
 
@@ -200,6 +193,22 @@ Shape Tetris::getCurrentShape() const {
 
 uint8_t Tetris::fallInterval() const {
   return 20; // TODO increase with level
+}
+
+void Tetris::drawTetromino() {
+  Shape shape = getCurrentShape();
+  for (uint8_t row = 0; row < 4; row++) {
+    Row shapeRow = getShapeRow(shape, row) << currentCol;
+    rows[currentRow + row] |= shapeRow;
+  }
+}
+
+void Tetris::eraseTetromino() {
+  Shape shape = getCurrentShape();
+  for (uint8_t row = 0; row < 4; row++) {
+    Row shapeRow = getShapeRow(shape, row) << currentCol;
+    rows[currentRow + row] &= ~shapeRow;
+  }
 }
 
 bool Tetris::isBlocked() const {
