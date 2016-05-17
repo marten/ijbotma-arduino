@@ -14,8 +14,9 @@ class TetrisRenderer {
     void render();
 
   private:
-    LCDBitmap bitmap;
     Tetris const *const tetris;
+    LiquidCrystal *lcd;
+    LCDBitmap bitmap;
 };
 
 #endif

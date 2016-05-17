@@ -78,6 +78,9 @@ class Tetris {
      */
     bool getPixel(uint8_t row, uint8_t col) const;
 
+    uint8_t getLevel() const { return 1 + lines / 10; }
+    uint16_t getScore() const { return score; }
+
     bool isGameOver();
 
   private:
@@ -95,6 +98,9 @@ class Tetris {
     TetrisButtons buttons;
 
     State state;
+    uint8_t lines;
+    uint16_t score;
+
     Bag bag;
     Row rows[MAX_ROWS];
 

@@ -4,8 +4,9 @@
 
 TetrisRenderer::TetrisRenderer(Tetris const &tetris, LiquidCrystal &lcd)
 :
-  bitmap(&lcd, 0, 0),
-  tetris(&tetris)
+  tetris(&tetris),
+  lcd(&lcd),
+  bitmap(&lcd, 0, 0)
 {
 }
 
@@ -22,4 +23,12 @@ void TetrisRenderer::render() {
     }
   }
   bitmap.update();
+
+  lcd->setCursor(4, 0);
+  lcd->print("Score: ");
+  lcd->print(tetris->getScore());
+
+  lcd->setCursor(4, 1);
+  lcd->print("Level: ");
+  lcd->print(tetris->getLevel());
 }
