@@ -22,9 +22,23 @@ void setup() {
   tetrisRenderer.render();
 }
 
+TetrisButtons button(int pin, TetrisButtons button) {
+  return digitalRead(pin) ? button : TetrisButtons(0);
+}
+
 void loop() {
+  TetrisButtons buttons = TetrisButtons(0);
+  for (int i = 0; i < 15; i++) {
+    buttons = buttons |
+      button(6, TetrisButtons::MOVE_LEFT) |
+      button(7, TetrisButtons::ROTATE_LEFT) |
+      button(8, TetrisButtons::ROTATE_RIGHT) |
+      button(9, TetrisButtons::MOVE_RIGHT);
+    delay(1);
+  }
+  
+  tetris.setButtons(buttons);
   if (tetris.tick()) {
     tetrisRenderer.render();
   }
-  delay(15);
 }

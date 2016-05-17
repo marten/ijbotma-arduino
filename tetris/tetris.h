@@ -11,6 +11,23 @@ typedef uint16_t Shape;
 
 unsigned const NUM_TETROMINOS = 7;
 
+enum class TetrisButtons : uint8_t {
+  MOVE_LEFT    = 0b00000001,
+  MOVE_RIGHT   = 0b00000010,
+  ROTATE_LEFT  = 0b00000100,
+  ROTATE_RIGHT = 0b00001000,
+  SOFT_DROP    = 0b00010000,
+  HARD_DROP    = 0b00100000,
+};
+
+inline TetrisButtons operator|(TetrisButtons a, TetrisButtons b) {
+  return TetrisButtons(uint8_t(a) | uint8_t(b));
+}
+
+inline bool operator&(TetrisButtons a, TetrisButtons b) {
+  return uint8_t(a) & uint8_t(b);
+}
+
 class Bag {
   public:
     Bag();
@@ -42,6 +59,11 @@ class Tetris {
     void begin(uint8_t numVisibleRows, uint8_t numCols);
 
     /**
+     * Call this before tick() with all buttons that are down, ORed together.
+     */
+    void setButtons(TetrisButtons buttons);
+
+    /**
      * Call this 60 times per second. Returns true if something changed.
      */
     bool tick();
@@ -70,6 +92,8 @@ class Tetris {
     uint8_t numRows;
     uint8_t numCols;
 
+    TetrisButtons buttons;
+
     State state;
     Bag bag;
     Row rows[MAX_ROWS];
@@ -81,10 +105,16 @@ class Tetris {
 
     uint8_t ticksUntilFall;
     uint8_t stateTicksRemaining;
+    uint8_t moveCooldown;
+    uint8_t rotateCooldown;
+
+    bool tickPlaying();
+    bool tickFilling();
 
     void spawn();
     void drawTetromino();
     void eraseTetromino();
+    bool move(int8_t delta);
     bool isBlocked() const;
     Shape getCurrentShape() const;
     uint8_t fallInterval() const;

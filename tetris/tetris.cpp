@@ -72,7 +72,8 @@ bool getShapePixel(Shape shape, uint8_t row, uint8_t col) {
   return shape & (1 << (4 * row + col));
 }
 
-uint8_t FILL_TICKS_PER_ROW = 6;
+uint8_t const FILL_TICKS_PER_ROW = 6;
+uint8_t const MOVE_INTERVAL = 10;
 
 } // namespace
 
@@ -106,6 +107,7 @@ void Tetris::begin(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWal
   numRows = numVisibleRowsWithoutFloor + 3;
   numCols = numColsWithoutWalls + 2;
   state = State::PLAYING;
+  buttons = (TetrisButtons) 0;
 
   Row full = (1 << numCols) - 1;
   Row walls = 1 | (1 << (numCols - 1));
@@ -114,44 +116,69 @@ void Tetris::begin(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWal
     rows[r] = walls;
   }
 
+  moveCooldown = 0;
+  rotateCooldown = 0;
+
   spawn();
 }
 
-bool Tetris::tick() {
-  bool change = false;
+void Tetris::setButtons(TetrisButtons bs) {
+  buttons = bs;
+}
 
+bool Tetris::tick() {
   switch (state) {
     case State::PLAYING:
-      ticksUntilFall--;
-      if (ticksUntilFall == 0) {
-        change = true;
-        ticksUntilFall = fallInterval();
-        eraseTetromino();
-        currentRow--;
-        if (!isBlocked()) {
-          drawTetromino();
-        } else {
-          currentRow++;
-          drawTetromino();
-          // TODO lock delay
-          // TODO line clear
-          spawn();
-        }
-      }
-      break;
-
+      return tickPlaying();
     case State::FILLING:
-      stateTicksRemaining--;
-      if (stateTicksRemaining % FILL_TICKS_PER_ROW == 0) {
-        change = true;
-        rows[numRows - 1 - stateTicksRemaining / FILL_TICKS_PER_ROW] = (1 << numCols) - 1;
-      }
-      if (stateTicksRemaining == 0) {
-        state = State::GAME_OVER;
-      }
-      break;
+      return tickFilling();
+    default:
+      return false;
+  }
+}
+
+bool Tetris::tickPlaying() {
+  bool change = false;
+
+  uint8_t moveDelta = 0;
+  if (buttons & TetrisButtons::MOVE_LEFT) {
+    moveDelta -= 1;
+  }
+  if (buttons & TetrisButtons::MOVE_RIGHT) {
+    moveDelta += 1;
+  }
+  change |= move(moveDelta);
+
+  ticksUntilFall--;
+  if (ticksUntilFall == 0) {
+    change = true;
+    ticksUntilFall = fallInterval();
+    eraseTetromino();
+    currentRow--;
+    if (!isBlocked()) {
+      drawTetromino();
+    } else {
+      currentRow++;
+      drawTetromino();
+      // TODO lock delay
+      // TODO line clear
+      spawn();
+    }
   }
 
+  return change;
+}
+
+bool Tetris::tickFilling() {
+  bool change = false;
+  stateTicksRemaining--;
+  if (stateTicksRemaining % FILL_TICKS_PER_ROW == 0) {
+    change = true;
+    rows[numRows - 1 - stateTicksRemaining / FILL_TICKS_PER_ROW] = (1 << numCols) - 1;
+  }
+  if (stateTicksRemaining == 0) {
+    state = State::GAME_OVER;
+  }
   return change;
 }
 
@@ -185,6 +212,25 @@ void Tetris::spawn() {
     state = State::FILLING;
     stateTicksRemaining = numRows * FILL_TICKS_PER_ROW + 1;
   }
+}
+
+bool Tetris::move(int8_t delta) {
+  if (moveCooldown) {
+    moveCooldown--;
+    return false;
+  }
+
+  bool change = false;
+  eraseTetromino();
+  currentCol += delta;
+  if (!isBlocked()) {
+    moveCooldown = MOVE_INTERVAL;
+    change = true;
+  } else {
+    currentCol -= delta;
+  }
+  drawTetromino();
+  return change;
 }
 
 Shape Tetris::getCurrentShape() const {
