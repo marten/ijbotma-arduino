@@ -81,8 +81,6 @@ class Tetris {
     uint8_t const numRows;
     uint8_t const numCols;
 
-    TetrisButtons buttons;
-
     uint8_t lines;
     uint16_t score;
 
@@ -94,10 +92,6 @@ class Tetris {
     uint8_t currentRow;
     uint8_t currentCol;
 
-    uint8_t ticksUntilFall;
-    uint8_t moveCooldown;
-    uint8_t rotateCooldown;
-
     TetrisRenderer renderer;
 
     void dropTetromino();
@@ -107,8 +101,8 @@ class Tetris {
     bool spawn();
     void drawTetromino();
     void eraseTetromino();
-    bool move(int8_t direction);
-    bool rotate(int8_t direction);
+    void move(int8_t direction);
+    void rotate(int8_t direction);
     bool isLine(uint8_t row) const;
     void clearRow(uint8_t row);
     bool isBlocked() const;

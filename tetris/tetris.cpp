@@ -108,10 +108,7 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
   :
     numRows(numVisibleRowsWithoutFloor + 3),
     numCols(numColsWithoutWalls + 2),
-    renderer(lcd),
-    buttons(TetrisButtons::NONE),
-    moveCooldown(0),
-    rotateCooldown(0)
+    renderer(lcd)
 {
 }
 
@@ -137,8 +134,14 @@ static TetrisButtons readButton(int pin, TetrisButtons button) {
 }
 
 void Tetris::dropTetromino() {
+  uint8_t ticksUntilFall = fallInterval();
+  uint8_t moveCooldown = 0;
+  uint8_t rotateCooldown = 0;
+
+  render();
+
   while (true) {
-    buttons = TetrisButtons::NONE;
+    TetrisButtons buttons = TetrisButtons::NONE;
     for (int i = 0; i < 15; i++) {
       buttons = buttons |
         readButton(6, TetrisButtons::MOVE_LEFT) |
@@ -157,7 +160,14 @@ void Tetris::dropTetromino() {
     if (buttons & TetrisButtons::ROTATE_RIGHT) {
       rotateDirection += 1;
     }
-    change |= rotate(rotateDirection);
+    if (rotateCooldown > 0) {
+      rotateCooldown--;
+    }
+    if (rotateDirection && !rotateCooldown) {
+      rotate(rotateDirection);
+      rotateCooldown = ROTATE_INTERVAL;
+      change = true;
+    }
 
     int8_t moveDirection = 0;
     if (buttons & TetrisButtons::MOVE_LEFT) {
@@ -166,7 +176,14 @@ void Tetris::dropTetromino() {
     if (buttons & TetrisButtons::MOVE_RIGHT) {
       moveDirection += 1;
     }
-    change |= move(moveDirection);
+    if (moveCooldown > 0) {
+      moveCooldown--;
+    }
+    if (moveDirection && !moveCooldown) {
+      move(moveDirection);
+      moveCooldown = MOVE_INTERVAL;
+      change = true;
+    }
 
     ticksUntilFall--;
     if (ticksUntilFall == 0) {
@@ -216,7 +233,6 @@ bool Tetris::spawn() {
   currentRow = numRows - 4;
   currentCol = numCols / 2 - 2;
   currentRotation = 0;
-  ticksUntilFall = fallInterval();
 
   if (!isBlocked()) {
     drawTetromino();
@@ -226,50 +242,22 @@ bool Tetris::spawn() {
   }
 }
 
-bool Tetris::move(int8_t direction) {
-  if (!direction) {
-    moveCooldown = 0;
-    return false;
-  }
-  if (moveCooldown) {
-    moveCooldown--;
-    return false;
-  }
-
-  bool change = false;
+void Tetris::move(int8_t direction) {
   eraseTetromino();
   currentCol += direction;
-  if (!isBlocked()) {
-    moveCooldown = MOVE_INTERVAL;
-    change = true;
-  } else {
+  if (isBlocked()) {
     currentCol -= direction;
   }
   drawTetromino();
-  return change;
 }
 
-bool Tetris::rotate(int8_t direction) {
-  if (!direction) {
-    rotateCooldown = 0;
-    return false;
-  }
-  if (rotateCooldown) {
-    rotateCooldown--;
-    return false;
-  }
-
-  bool change = false;
+void Tetris::rotate(int8_t direction) {
   eraseTetromino();
   currentRotation = (currentRotation + 4 + direction) % 4;
-  if (!isBlocked()) {
-    rotateCooldown = ROTATE_INTERVAL;
-    change = true;
-  } else {
+  if (isBlocked()) {
     currentRotation = (currentRotation + 4 - direction) % 4;
   }
   drawTetromino();
-  return change;
 }
 
 void Tetris::clearLines() {
