@@ -338,7 +338,7 @@ Shape Tetris::getCurrentShape() const {
 }
 
 uint8_t Tetris::fallInterval() const {
-  return 40; // TODO increase with level
+  return 50 - 4 * getLevel();
 }
 
 void Tetris::drawTetromino() {
