@@ -107,9 +107,9 @@ void Bag::shuffle() {
 Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, LiquidCrystal &lcd)
   :
     numRows(numVisibleRowsWithoutFloor + 3),
-    numCols(numColsWithoutWalls + 2),
-    emptyRow(1 | (1 << (numCols - 1))),
-    fullRow((1 << numCols) - 1),
+    numCols(numColsWithoutWalls + 4),
+    emptyRow(2 | (1 << (numCols - 2))),
+    fullRow(((1 << (numCols - 2)) - 1) << 1),
     buttonMappings({TetrisButton::NONE}),
     lines(0),
     score(0),
@@ -330,7 +330,7 @@ void Tetris::collapseRow(uint8_t row) {
   for (row++; row < numRows; row++) {
     rows[row - 1] = rows[row]; 
   }
-  rows[numRows - 1] = (1 << (numCols - 1)) | 1;
+  rows[numRows - 1] = emptyRow;
 }
 
 Shape Tetris::getCurrentShape() const {
