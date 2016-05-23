@@ -137,12 +137,8 @@ static TetrisButtons readButton(int pin, TetrisButtons button) {
   return digitalRead(pin) ? button : TetrisButtons::NONE;
 }
 
-void Tetris::setButtons(TetrisButtons bs) {
-  buttons = bs;
-}
-
 bool Tetris::tick() {
-  TetrisButtons buttons = TetrisButtons::NONE;
+  buttons = TetrisButtons::NONE;
   for (int i = 0; i < 15; i++) {
     buttons = buttons |
       readButton(6, TetrisButtons::MOVE_LEFT) |
@@ -151,7 +147,6 @@ bool Tetris::tick() {
       readButton(9, TetrisButtons::MOVE_RIGHT);
     delay(1);
   }
-  setButtons(buttons);
   
   bool change = false;
 

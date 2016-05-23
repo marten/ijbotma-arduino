@@ -64,11 +64,6 @@ class Tetris {
     void play();
 
     /**
-     * Call this before tick() with all buttons that are down, ORed together.
-     */
-    void setButtons(TetrisButtons buttons);
-
-    /**
      * Call this 60 times per second. Returns true if something changed.
      */
     bool tick();
