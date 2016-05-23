@@ -111,8 +111,14 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
     emptyRow(1 | (1 << (numCols - 1))),
     fullRow((1 << numCols) - 1),
     buttonMappings({TetrisButton::NONE}),
+    lines(0),
+    score(0),
     renderer(lcd)
 {
+  rows[0] = fullRow;
+  for (unsigned r = 1; r < numRows; r++) {
+    rows[r] = emptyRow;
+  }
 }
 
 void Tetris::mapButton(int pin, TetrisButton button) {
@@ -121,11 +127,6 @@ void Tetris::mapButton(int pin, TetrisButton button) {
 
 void Tetris::play() {
   renderer.begin();
-
-  rows[0] = fullRow;
-  for (unsigned r = 1; r < numRows; r++) {
-    rows[r] = emptyRow;
-  }
 
   while (spawn()) {
     dropTetromino();
@@ -192,19 +193,18 @@ void Tetris::dropTetromino() {
       change = true;
     }
 
-    ticksUntilFall--;
-    if (ticksUntilFall == 0) {
+    if (buttons & TetrisButton::HARD_DROP) {
+      hardDrop();
       change = true;
-      ticksUntilFall = fallInterval();
-      eraseTetromino();
-      currentRow--;
-      if (!isBlocked()) {
-        drawTetromino();
-      } else {
-        currentRow++;
-        drawTetromino();
-        // TODO lock delay
-        return;
+    } else {
+      ticksUntilFall--;
+      if (ticksUntilFall == 0) {
+        if (!fall()) {
+          // TODO lock delay
+          return;
+        }
+        change = true;
+        ticksUntilFall = fallInterval();
       }
     }
 
@@ -264,6 +264,28 @@ void Tetris::rotate(int8_t direction) {
   if (isBlocked()) {
     currentRotation = (currentRotation + 4 - direction) % 4;
   }
+  drawTetromino();
+}
+
+bool Tetris::fall() {
+  eraseTetromino();
+  currentRow--;
+  if (!isBlocked()) {
+    drawTetromino();
+    return true;
+  } else {
+    currentRow++;
+    drawTetromino();
+    return false;
+  }
+}
+
+void Tetris::hardDrop() {
+  eraseTetromino();
+  while (!isBlocked()) {
+    currentRow--;
+  }
+  currentRow++;
   drawTetromino();
 }
 

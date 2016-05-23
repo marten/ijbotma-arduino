@@ -115,6 +115,8 @@ class Tetris {
     void eraseTetromino();
     void move(int8_t direction);
     void rotate(int8_t direction);
+    bool fall();
+    void hardDrop();
     bool isLine(uint8_t row) const;
     void collapseRow(uint8_t row);
     bool isBlocked() const;
