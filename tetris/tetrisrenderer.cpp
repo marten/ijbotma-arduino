@@ -4,7 +4,7 @@
 
 TetrisRenderer::TetrisRenderer(LiquidCrystal &lcd)
 :
-  lcd(&lcd),
+  lcd(lcd),
   bitmap(&lcd, 0, 0)
 {
 }
@@ -23,11 +23,31 @@ void TetrisRenderer::render(Tetris const &tetris) {
   }
   bitmap.update();
 
-  lcd->setCursor(4, 0);
-  lcd->print("Score: ");
-  lcd->print(tetris.getScore());
+  lcd.setCursor(4, 0);
+  lcd.print("Score: ");
+  lcd.print(tetris.getScore());
 
-  lcd->setCursor(4, 1);
-  lcd->print("Level: ");
-  lcd->print(tetris.getLevel());
+  lcd.setCursor(4, 1);
+  lcd.print("Level: ");
+  lcd.print(tetris.getLevel());
+}
+
+void TetrisRenderer::flashText(__FlashStringHelper const *firstLine, __FlashStringHelper const *secondLine) {
+  for (int i = 0; i < 3; i++) {
+    lcd.clear();
+    delay(200);
+
+    lcd.setCursor(0, 0);
+    lcd.print(firstLine);
+    lcd.setCursor(0, 1);
+    lcd.print(secondLine);
+    delay(200);
+  }
+}
+
+void TetrisRenderer::wipeLeft() {
+  for (int i = 0; i < 16; i++) {
+    lcd.scrollDisplayLeft();
+    delay(100);
+  }
 }

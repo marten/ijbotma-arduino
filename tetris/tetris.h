@@ -108,6 +108,7 @@ class Tetris {
     void dropTetromino();
     void clearLines();
     void animateGameOver();
+    void animateWin();
 
     TetrisButton readButtons();
     bool spawn();

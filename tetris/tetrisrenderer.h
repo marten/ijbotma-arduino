@@ -3,6 +3,8 @@
 
 #include "LCDBitmap.h"
 
+#include <Arduino.h>
+
 class LiquidCrystal;
 class Tetris;
 
@@ -12,9 +14,11 @@ class TetrisRenderer {
 
     void begin();
     void render(Tetris const &tetris);
+    void flashText(__FlashStringHelper const *firstLine, __FlashStringHelper const *secondLine);
+    void wipeLeft();
 
   private:
-    LiquidCrystal *lcd;
+    LiquidCrystal &lcd;
     LCDBitmap bitmap;
 };
 

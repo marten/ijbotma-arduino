@@ -131,6 +131,10 @@ void Tetris::play() {
   while (spawn()) {
     dropTetromino();
     clearLines();
+    if (getLevel() > 10) {
+      animateWin();
+      return;
+    }
   }
   animateGameOver();
 }
@@ -220,6 +224,29 @@ void Tetris::animateGameOver() {
     render();
     delay(100);
   }
+  delay(2000);
+
+  renderer.flashText(
+      F("   De stekker   "),
+      F("   is  eruit!   "));
+  delay(3000);
+  renderer.wipeLeft();
+}
+
+void Tetris::animateWin() {
+  renderer.flashText(
+      F("    Je hebt    "),
+      F("   gewonnen.   "));
+  delay(3000);
+  renderer.wipeLeft();
+
+  delay(1000);
+
+  renderer.flashText(
+      F("  Dat lijkt me  "),
+      F("    evident.    "));
+  delay(3000);
+  renderer.wipeLeft();
 }
 
 uint8_t Tetris::getNumRows() const {
