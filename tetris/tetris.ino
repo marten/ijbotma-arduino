@@ -15,9 +15,8 @@ void setup() {
   pinMode(9, INPUT);
 
   randomSeed(analogRead(0));
-  tetris.begin();
+  tetris.play();
 }
 
 void loop() {
-  tetris.tick();
 }

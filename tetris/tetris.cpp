@@ -113,7 +113,7 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
 {
 }
 
-void Tetris::begin() {
+void Tetris::play() {
   renderer.begin();
 
   state = State::PLAYING;
@@ -130,6 +130,10 @@ void Tetris::begin() {
   rotateCooldown = 0;
 
   spawn();
+
+  while (true) {
+    tick();
+  }
 }
 
 static TetrisButtons readButton(int pin, TetrisButtons button) {

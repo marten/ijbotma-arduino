@@ -58,7 +58,10 @@ class Tetris {
      */
     Tetris(uint8_t numVisibleRows, uint8_t numCols, LiquidCrystal &lcd);
 
-    void begin();
+    /**
+     * Plays a game of Tetris and returns when the game is over.
+     */
+    void play();
 
     /**
      * Call this before tick() with all buttons that are down, ORed together.
