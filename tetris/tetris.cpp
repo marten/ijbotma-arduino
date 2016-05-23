@@ -323,8 +323,7 @@ void Tetris::clearLines() {
 }
 
 bool Tetris::isLine(uint8_t row) const {
-  Row lineMask = (1 << (numCols - 1)) - 2;
-  return (rows[row] & lineMask) == lineMask;
+  return (rows[row] & fullRow) == fullRow;
 }
 
 void Tetris::collapseRow(uint8_t row) {
