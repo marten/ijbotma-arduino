@@ -105,17 +105,17 @@ void Bag::shuffle() {
   }
 }
 
-Tetris::Tetris(LiquidCrystal &lcd)
+Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, LiquidCrystal &lcd)
   :
+    numRows(numVisibleRowsWithoutFloor + 3),
+    numCols(numColsWithoutWalls + 2),
     renderer(lcd)
 {
 }
 
-void Tetris::begin(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls) {
+void Tetris::begin() {
   renderer.begin();
 
-  numRows = numVisibleRowsWithoutFloor + 3;
-  numCols = numColsWithoutWalls + 2;
   state = State::PLAYING;
   buttons = (TetrisButtons) 0;
 

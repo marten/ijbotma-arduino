@@ -52,14 +52,13 @@ class Tetris {
   public:
 
     /**
-     * Creates uninitialized Tetris, to let us declare it as a global variable.
+     * Creates and initializes game state.
+     * Standard Tetris is 20 visible rows, 10 columns, but the maximum on our
+     * LCD is 15 rows, 18 columns.
      */
-    Tetris(LiquidCrystal &lcd);
+    Tetris(uint8_t numVisibleRows, uint8_t numCols, LiquidCrystal &lcd);
 
-    /**
-     * Standard Tetris is 20 visible rows, 10 columns.
-     */
-    void begin(uint8_t numVisibleRows, uint8_t numCols);
+    void begin();
 
     /**
      * Call this before tick() with all buttons that are down, ORed together.
@@ -95,8 +94,8 @@ class Tetris {
       GAME_OVER,
     };
 
-    uint8_t numRows;
-    uint8_t numCols;
+    uint8_t const numRows;
+    uint8_t const numCols;
 
     TetrisButtons buttons;
 
