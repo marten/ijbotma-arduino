@@ -63,11 +63,6 @@ class Tetris {
      */
     void play();
 
-    /**
-     * Call this 60 times per second. Returns true if something changed.
-     */
-    bool tick();
-
     uint8_t getNumRows() const;
     uint8_t getNumCols() const;
 
@@ -81,23 +76,13 @@ class Tetris {
     uint8_t getLevel() const { return 1 + lines / 10; }
     uint16_t getScore() const { return score; }
 
-    bool isGameOver();
-
   private:
-
-    enum class State : uint8_t {
-      PLAYING,
-      FILLING,
-      FLASHING,
-      GAME_OVER,
-    };
 
     uint8_t const numRows;
     uint8_t const numCols;
 
     TetrisButtons buttons;
 
-    State state;
     uint8_t lines;
     uint16_t score;
 
@@ -110,26 +95,27 @@ class Tetris {
     uint8_t currentCol;
 
     uint8_t ticksUntilFall;
-    uint8_t stateTicksRemaining;
     uint8_t moveCooldown;
     uint8_t rotateCooldown;
 
     TetrisRenderer renderer;
 
-    bool tickPlaying();
-    bool tickFilling();
+    void dropTetromino();
+    void clearLines();
+    void animateGameOver();
 
-    void spawn();
+    bool spawn();
     void drawTetromino();
     void eraseTetromino();
     bool move(int8_t direction);
     bool rotate(int8_t direction);
-    void clearLines();
     bool isLine(uint8_t row) const;
     void clearRow(uint8_t row);
     bool isBlocked() const;
     Shape getCurrentShape() const;
     uint8_t fallInterval() const;
+
+    void render();
 };
 
 #endif
