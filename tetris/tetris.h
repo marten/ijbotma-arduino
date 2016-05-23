@@ -81,6 +81,9 @@ class Tetris {
     uint8_t const numRows;
     uint8_t const numCols;
 
+    Row const emptyRow;
+    Row const fullRow;
+
     uint8_t lines;
     uint16_t score;
 
@@ -104,7 +107,7 @@ class Tetris {
     void move(int8_t direction);
     void rotate(int8_t direction);
     bool isLine(uint8_t row) const;
-    void clearRow(uint8_t row);
+    void collapseRow(uint8_t row);
     bool isBlocked() const;
     Shape getCurrentShape() const;
     uint8_t fallInterval() const;

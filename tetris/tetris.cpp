@@ -108,6 +108,8 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
   :
     numRows(numVisibleRowsWithoutFloor + 3),
     numCols(numColsWithoutWalls + 2),
+    emptyRow(1 | (1 << (numCols - 1))),
+    fullRow((1 << numCols) - 1),
     renderer(lcd)
 {
 }
@@ -115,11 +117,9 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
 void Tetris::play() {
   renderer.begin();
 
-  Row full = (1 << numCols) - 1;
-  Row walls = 1 | (1 << (numCols - 1));
-  rows[0] = full;
+  rows[0] = fullRow;
   for (unsigned r = 1; r < numRows; r++) {
-    rows[r] = walls;
+    rows[r] = emptyRow;
   }
 
   while (spawn()) {
@@ -209,7 +209,7 @@ void Tetris::dropTetromino() {
 
 void Tetris::animateGameOver() {
   for (uint8_t row = 1; row < numRows - 2; row++) {
-    rows[row] = (1 << numCols) - 1;
+    rows[row] = fullRow;
     render();
     delay(100);
   }
@@ -262,16 +262,34 @@ void Tetris::rotate(int8_t direction) {
 
 void Tetris::clearLines() {
   uint8_t count = 0;
+  uint8_t linesMask = 0;
   for (uint8_t row = 1; row < numRows; row++) {
     if (isLine(row)) {
-      clearRow(row);
-      row--;
+      linesMask |= (1 << row);
       count++;
     }
   }
+
   if (count > 0) {
+    for (uint8_t i = 0; i < 5; i++) {
+      for (uint8_t row = 1; row < numRows; row++) {
+        if (linesMask & (1 << row)) {
+          rows[row] = (i % 2 == 0) ? emptyRow : fullRow;
+        }
+      }
+      render();
+      delay(30);
+    }
+
     lines += count;
     score += SCORE_MULTIPLIERS[count] * getLevel();
+
+    for (uint8_t row = numRows - 1; row > 0; row--) {
+      if (linesMask & (1 << row)) {
+        collapseRow(row);
+      }
+    }
+    render();
   }
 }
 
@@ -280,7 +298,7 @@ bool Tetris::isLine(uint8_t row) const {
   return (rows[row] & lineMask) == lineMask;
 }
 
-void Tetris::clearRow(uint8_t row) {
+void Tetris::collapseRow(uint8_t row) {
   for (row++; row < numRows; row++) {
     rows[row - 1] = rows[row]; 
   }
