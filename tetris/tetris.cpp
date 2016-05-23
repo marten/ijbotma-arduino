@@ -66,6 +66,28 @@ Shape const SHAPES[NUM_TETROMINOS][NUM_ROTATIONS] = {
 
 // TODO wall kicks
 // https://tetris.wiki/SRS#Wall_Kicks
+// Only kicks for rotation (right) rotation have been recorded here; negate for
+// counterclockwise (left).
+// The first entry is implicitly 0,0 and has been left out.
+#define ENCODE_WALL_KICK(x, y) \
+  ((uint8_t(int(x) << 0) & uint8_t(0b00001111)) | (uint8_t(int(y) << 4) & uint8_t(0b11110000)))
+#define ENCODE_WALL_KICKS(x1,y1, x2,y2, x3,y3, x4,y4) \
+  ((ENCODE_WALL_KICK(x1, y1) << 0) | \
+   (ENCODE_WALL_KICK(x2, y2) << 8) | \
+   (ENCODE_WALL_KICK(x3, y3) << 16) | \
+   (ENCODE_WALL_KICK(x4, y4) << 24))
+uint32_t const OTHER_WALL_KICKS[NUM_ROTATIONS] = {
+  ENCODE_WALL_KICKS(-1,0, -1,+1, 0,-2, -1,-2),
+  ENCODE_WALL_KICKS(+1,0, +1,-1, 0,+2, +1,+2),
+  ENCODE_WALL_KICKS(+1,0, +1,+1, 0,-2, +1,-2),
+  ENCODE_WALL_KICKS(-1,0, -1,-1, 2,+2, -1,+2),
+};
+uint32_t const I_WALL_KICKS[NUM_ROTATIONS] = {
+  ENCODE_WALL_KICKS(-2,0, +1,0, -2,-1, +1,+2),
+  ENCODE_WALL_KICKS(-1,0, +2,0, -1,+2, +2,-1),
+  ENCODE_WALL_KICKS(+2,0, -1,0, +2,+1, -1,-2),
+  ENCODE_WALL_KICKS(+1,0, -2,0, +1,-2, -2,+1),
+};
 
 Row getShapeRow(Shape shape, uint8_t row) {
   return (shape >> (4 * row)) & 0b1111;
