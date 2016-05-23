@@ -12,8 +12,9 @@ typedef uint8_t Tetromino;
 typedef uint16_t Shape;
 
 unsigned const NUM_TETROMINOS = 7;
+unsigned const NUM_PINS = 14;
 
-enum class TetrisButtons : uint8_t {
+enum class TetrisButton : uint8_t {
   NONE         = 0,
   MOVE_LEFT    = 0b00000001,
   MOVE_RIGHT   = 0b00000010,
@@ -23,11 +24,11 @@ enum class TetrisButtons : uint8_t {
   HARD_DROP    = 0b00100000,
 };
 
-inline TetrisButtons operator|(TetrisButtons a, TetrisButtons b) {
-  return TetrisButtons(uint8_t(a) | uint8_t(b));
+inline TetrisButton operator|(TetrisButton a, TetrisButton b) {
+  return TetrisButton(uint8_t(a) | uint8_t(b));
 }
 
-inline bool operator&(TetrisButtons a, TetrisButtons b) {
+inline bool operator&(TetrisButton a, TetrisButton b) {
   return uint8_t(a) & uint8_t(b);
 }
 
@@ -59,6 +60,11 @@ class Tetris {
     Tetris(uint8_t numVisibleRows, uint8_t numCols, LiquidCrystal &lcd);
 
     /**
+     * Sets up a button mapping.
+     */
+    void mapButton(int pin, TetrisButton button);
+
+    /**
      * Plays a game of Tetris and returns when the game is over.
      */
     void play();
@@ -84,6 +90,8 @@ class Tetris {
     Row const emptyRow;
     Row const fullRow;
 
+    TetrisButton buttonMappings[NUM_PINS];
+
     uint8_t lines;
     uint16_t score;
 
@@ -101,6 +109,7 @@ class Tetris {
     void clearLines();
     void animateGameOver();
 
+    TetrisButton readButtons();
     bool spawn();
     void drawTetromino();
     void eraseTetromino();

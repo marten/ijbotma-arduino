@@ -110,8 +110,13 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
     numCols(numColsWithoutWalls + 2),
     emptyRow(1 | (1 << (numCols - 1))),
     fullRow((1 << numCols) - 1),
+    buttonMappings({TetrisButton::NONE}),
     renderer(lcd)
 {
+}
+
+void Tetris::mapButton(int pin, TetrisButton button) {
+  buttonMappings[pin] = button;
 }
 
 void Tetris::play() {
@@ -129,8 +134,14 @@ void Tetris::play() {
   animateGameOver();
 }
 
-static TetrisButtons readButton(int pin, TetrisButtons button) {
-  return digitalRead(pin) ? button : TetrisButtons::NONE;
+TetrisButton Tetris::readButtons() {
+  TetrisButton buttons = TetrisButton::NONE;
+  for (unsigned pin = 0; pin < NUM_PINS; pin++) {
+    if (buttonMappings[pin] != TetrisButton::NONE && digitalRead(pin)) {
+      buttons = buttons | buttonMappings[pin];
+    }
+  }
+  return buttons;
 }
 
 void Tetris::dropTetromino() {
@@ -141,23 +152,19 @@ void Tetris::dropTetromino() {
   render();
 
   while (true) {
-    TetrisButtons buttons = TetrisButtons::NONE;
+    TetrisButton buttons = TetrisButton::NONE;
     for (int i = 0; i < 15; i++) {
-      buttons = buttons |
-        readButton(6, TetrisButtons::MOVE_LEFT) |
-        readButton(7, TetrisButtons::ROTATE_LEFT) |
-        readButton(8, TetrisButtons::ROTATE_RIGHT) |
-        readButton(9, TetrisButtons::MOVE_RIGHT);
+      buttons = buttons | readButtons();
       delay(1);
     }
     
     bool change = false;
 
     int8_t rotateDirection = 0;
-    if (buttons & TetrisButtons::ROTATE_LEFT) {
+    if (buttons & TetrisButton::ROTATE_LEFT) {
       rotateDirection -= 1;
     }
-    if (buttons & TetrisButtons::ROTATE_RIGHT) {
+    if (buttons & TetrisButton::ROTATE_RIGHT) {
       rotateDirection += 1;
     }
     if (rotateCooldown > 0) {
@@ -170,10 +177,10 @@ void Tetris::dropTetromino() {
     }
 
     int8_t moveDirection = 0;
-    if (buttons & TetrisButtons::MOVE_LEFT) {
+    if (buttons & TetrisButton::MOVE_LEFT) {
       moveDirection -= 1;
     }
-    if (buttons & TetrisButtons::MOVE_RIGHT) {
+    if (buttons & TetrisButton::MOVE_RIGHT) {
       moveDirection += 1;
     }
     if (moveCooldown > 0) {
