@@ -132,11 +132,26 @@ void Tetris::begin() {
   spawn();
 }
 
+static TetrisButtons readButton(int pin, TetrisButtons button) {
+  return digitalRead(pin) ? button : TetrisButtons::NONE;
+}
+
 void Tetris::setButtons(TetrisButtons bs) {
   buttons = bs;
 }
 
 bool Tetris::tick() {
+  TetrisButtons buttons = TetrisButtons::NONE;
+  for (int i = 0; i < 15; i++) {
+    buttons = buttons |
+      readButton(6, TetrisButtons::MOVE_LEFT) |
+      readButton(7, TetrisButtons::ROTATE_LEFT) |
+      readButton(8, TetrisButtons::ROTATE_RIGHT) |
+      readButton(9, TetrisButtons::MOVE_RIGHT);
+    delay(1);
+  }
+  setButtons(buttons);
+  
   bool change = false;
 
   switch (state) {
