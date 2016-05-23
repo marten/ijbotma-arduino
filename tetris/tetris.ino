@@ -23,11 +23,11 @@ void setup() {
 }
 
 TetrisButtons button(int pin, TetrisButtons button) {
-  return digitalRead(pin) ? button : TetrisButtons(0);
+  return digitalRead(pin) ? button : TetrisButtons::NONE;
 }
 
 void loop() {
-  TetrisButtons buttons = TetrisButtons(0);
+  TetrisButtons buttons = TetrisButtons::NONE;
   for (int i = 0; i < 15; i++) {
     buttons = buttons |
       button(6, TetrisButtons::MOVE_LEFT) |

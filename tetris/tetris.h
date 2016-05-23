@@ -12,6 +12,7 @@ typedef uint16_t Shape;
 unsigned const NUM_TETROMINOS = 7;
 
 enum class TetrisButtons : uint8_t {
+  NONE         = 0,
   MOVE_LEFT    = 0b00000001,
   MOVE_RIGHT   = 0b00000010,
   ROTATE_LEFT  = 0b00000100,
