@@ -75,7 +75,7 @@ bool getShapePixel(Shape shape, uint8_t row, uint8_t col) {
 uint8_t const FILL_TICKS_PER_ROW = 6;
 uint8_t const MOVE_INTERVAL = 10;
 uint8_t const ROTATE_INTERVAL = 30;
-uint8_t const SCORE_MULTIPLIERS[4] = {1, 2, 7, 30};
+uint8_t const SCORE_MULTIPLIERS[5] = {0, 1, 2, 7, 30};
 
 } // namespace
 
