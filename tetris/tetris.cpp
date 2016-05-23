@@ -109,15 +109,17 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
   :
     numRows(numVisibleRowsWithoutFloor + 3),
     numCols(numColsWithoutWalls + 2),
-    renderer(lcd)
+    renderer(lcd),
+    state(State::PLAYING),
+    buttons(TetrisButtons::NONE),
+    moveCooldown(0),
+    rotateCooldown(0)
 {
+  spawn();
 }
 
 void Tetris::play() {
   renderer.begin();
-
-  state = State::PLAYING;
-  buttons = (TetrisButtons) 0;
 
   Row full = (1 << numCols) - 1;
   Row walls = 1 | (1 << (numCols - 1));
@@ -125,11 +127,6 @@ void Tetris::play() {
   for (unsigned r = 1; r < numRows; r++) {
     rows[r] = walls;
   }
-
-  moveCooldown = 0;
-  rotateCooldown = 0;
-
-  spawn();
 
   while (true) {
     tick();
