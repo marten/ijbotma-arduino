@@ -64,6 +64,9 @@ Shape const SHAPES[NUM_TETROMINOS][NUM_ROTATIONS] = {
   },
 };
 
+// TODO wall kicks
+// https://tetris.wiki/SRS#Wall_Kicks
+
 Row getShapeRow(Shape shape, uint8_t row) {
   return (shape >> (4 * row)) & 0b1111;
 }
