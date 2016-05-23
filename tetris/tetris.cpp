@@ -276,7 +276,7 @@ void Tetris::clearLines() {
 }
 
 bool Tetris::isLine(uint8_t row) const {
-  uint8_t lineMask = (1 << (numCols - 1)) - 2;
+  Row lineMask = (1 << (numCols - 1)) - 2;
   return (rows[row] & lineMask) == lineMask;
 }
 
