@@ -105,7 +105,15 @@ void Bag::shuffle() {
   }
 }
 
+Tetris::Tetris(LiquidCrystal &lcd)
+  :
+    renderer(lcd)
+{
+}
+
 void Tetris::begin(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls) {
+  renderer.begin();
+
   numRows = numVisibleRowsWithoutFloor + 3;
   numCols = numColsWithoutWalls + 2;
   state = State::PLAYING;
@@ -129,13 +137,19 @@ void Tetris::setButtons(TetrisButtons bs) {
 }
 
 bool Tetris::tick() {
+  bool change = false;
+
   switch (state) {
     case State::PLAYING:
-      return tickPlaying();
+      change = tickPlaying();
+      break;
     case State::FILLING:
-      return tickFilling();
-    default:
-      return false;
+      change = tickFilling();
+      break;
+  }
+
+  if (change) {
+    renderer.render(*this);
   }
 }
 

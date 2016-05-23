@@ -3,18 +3,17 @@
 
 #include "LCDBitmap.h"
 
-class Tetris;
 class LiquidCrystal;
+class Tetris;
 
 class TetrisRenderer {
   public:
-    TetrisRenderer(Tetris const &tetris, LiquidCrystal &lcd);
+    TetrisRenderer(LiquidCrystal &lcd);
 
     void begin();
-    void render();
+    void render(Tetris const &tetris);
 
   private:
-    Tetris const *const tetris;
     LiquidCrystal *lcd;
     LCDBitmap bitmap;
 };

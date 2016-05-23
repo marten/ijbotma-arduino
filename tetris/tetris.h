@@ -1,6 +1,8 @@
 #ifndef TETRIS_H_
 #define TETRIS_H_
 
+#include "tetrisrenderer.h"
+
 #include <stdint.h>
 
 unsigned const MAX_ROWS = 22;
@@ -52,7 +54,7 @@ class Tetris {
     /**
      * Creates uninitialized Tetris, to let us declare it as a global variable.
      */
-    Tetris() {}
+    Tetris(LiquidCrystal &lcd);
 
     /**
      * Standard Tetris is 20 visible rows, 10 columns.
@@ -114,6 +116,8 @@ class Tetris {
     uint8_t stateTicksRemaining;
     uint8_t moveCooldown;
     uint8_t rotateCooldown;
+
+    TetrisRenderer renderer;
 
     bool tickPlaying();
     bool tickFilling();

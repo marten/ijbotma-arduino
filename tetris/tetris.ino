@@ -1,12 +1,10 @@
 #include "tetris.h"
-#include "tetrisrenderer.h"
 
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-Tetris tetris;
-TetrisRenderer tetrisRenderer(tetris, lcd);
+Tetris tetris(lcd);
 
 void setup() {
   lcd.begin(16, 2);
@@ -18,8 +16,6 @@ void setup() {
 
   randomSeed(analogRead(0));
   tetris.begin(15, 10);
-  tetrisRenderer.begin();
-  tetrisRenderer.render();
 }
 
 TetrisButtons button(int pin, TetrisButtons button) {
@@ -38,7 +34,5 @@ void loop() {
   }
   
   tetris.setButtons(buttons);
-  if (tetris.tick()) {
-    tetrisRenderer.render();
-  }
+  tetris.tick();
 }
