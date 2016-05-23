@@ -106,7 +106,7 @@ void Bag::shuffle() {
 
 Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, LiquidCrystal &lcd)
   :
-    numRows(numVisibleRowsWithoutFloor + 3),
+    numRows(numVisibleRowsWithoutFloor + 4),
     numCols(numColsWithoutWalls + 4),
     emptyRow(2 | (1 << (numCols - 2))),
     fullRow(((1 << (numCols - 2)) - 1) << 1),
@@ -116,7 +116,8 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
     renderer(lcd)
 {
   rows[0] = fullRow;
-  for (unsigned r = 1; r < numRows; r++) {
+  rows[1] = fullRow;
+  for (unsigned r = 2; r < numRows; r++) {
     rows[r] = emptyRow;
   }
 }
@@ -219,7 +220,7 @@ void Tetris::dropTetromino() {
 }
 
 void Tetris::animateGameOver() {
-  for (uint8_t row = 1; row < numRows - 2; row++) {
+  for (uint8_t row = 2; row < numRows - 2; row++) {
     rows[row] = fullRow;
     render();
     delay(100);
@@ -250,7 +251,7 @@ void Tetris::animateWin() {
 }
 
 uint8_t Tetris::getNumRows() const {
-  return numRows - 2;
+  return numRows - 3;
 }
 
 uint8_t Tetris::getNumCols() const {
@@ -258,7 +259,7 @@ uint8_t Tetris::getNumCols() const {
 }
 
 bool Tetris::getPixel(uint8_t row, uint8_t col) const {
-  return rows[row] & (1 << col);
+  return rows[row + 1] & (1 << col);
 }
 
 bool Tetris::spawn() {
@@ -319,7 +320,7 @@ void Tetris::hardDrop() {
 void Tetris::clearLines() {
   uint8_t count = 0;
   uint8_t linesMask = 0;
-  for (uint8_t row = 1; row < numRows; row++) {
+  for (uint8_t row = 2; row < numRows; row++) {
     if (isLine(row)) {
       linesMask |= (1 << row);
       count++;
@@ -328,7 +329,7 @@ void Tetris::clearLines() {
 
   if (count > 0) {
     for (uint8_t i = 0; i < 5; i++) {
-      for (uint8_t row = 1; row < numRows; row++) {
+      for (uint8_t row = 2; row < numRows; row++) {
         if (linesMask & (1 << row)) {
           rows[row] = (i % 2 == 0) ? emptyRow : fullRow;
         }
@@ -340,7 +341,7 @@ void Tetris::clearLines() {
     lines += count;
     score += SCORE_MULTIPLIERS[count] * getLevel();
 
-    for (uint8_t row = numRows - 1; row > 0; row--) {
+    for (uint8_t row = numRows - 1; row >= 2; row--) {
       if (linesMask & (1 << row)) {
         collapseRow(row);
       }
@@ -354,8 +355,8 @@ bool Tetris::isLine(uint8_t row) const {
 }
 
 void Tetris::collapseRow(uint8_t row) {
-  for (row++; row < numRows; row++) {
-    rows[row - 1] = rows[row]; 
+  for (; row < numRows - 1; row++) {
+    rows[row] = rows[row + 1]; 
   }
   rows[numRows - 1] = emptyRow;
 }
