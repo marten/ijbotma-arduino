@@ -127,6 +127,7 @@ inline int8_t getWallKickY(uint8_t kick, int8_t direction) {
 
 uint8_t const MOVE_INTERVAL = 10;
 uint8_t const ROTATE_INTERVAL = 30;
+uint8_t const SOFT_DROP_INTERVAL = 10;
 uint8_t const SCORE_MULTIPLIERS[5] = {0, 1, 2, 7, 30};
 
 } // namespace
@@ -207,6 +208,7 @@ void Tetris::dropTetromino() {
   uint8_t ticksUntilFall = fallInterval();
   uint8_t moveCooldown = 0;
   uint8_t rotateCooldown = 0;
+  uint8_t softDropCooldown = 0;
 
   render();
 
@@ -251,9 +253,21 @@ void Tetris::dropTetromino() {
       change = true;
     }
 
+    if (softDropCooldown > 0) {
+      softDropCooldown--;
+    }
     if (buttons & TetrisButton::HARD_DROP) {
       hardDrop();
       change = true;
+    } else if (buttons & TetrisButton::SOFT_DROP) {
+      if (!softDropCooldown) {
+        if (!fall()) {
+          return;
+        }
+        change = true;
+        ticksUntilFall = fallInterval();
+        softDropCooldown = SOFT_DROP_INTERVAL;
+      }
     } else {
       ticksUntilFall--;
       if (ticksUntilFall == 0) {
