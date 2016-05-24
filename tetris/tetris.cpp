@@ -64,24 +64,29 @@ Shape const SHAPES[NUM_TETROMINOS][NUM_ROTATIONS] = {
   },
 };
 
-// TODO wall kicks
+Row getShapeRow(Shape shape, uint8_t row) {
+  return (shape >> (4 * row)) & 0b1111;
+}
+
+bool getShapePixel(Shape shape, uint8_t row, uint8_t col) {
+  return shape & (1 << (4 * row + col));
+}
+
 // https://tetris.wiki/SRS#Wall_Kicks
 // Only kicks for rotation (right) rotation have been recorded here; negate for
 // counterclockwise (left).
-// The first entry is implicitly 0,0 and has been left out.
+// The first entry is implicitly 0,0 and has been left out of the tables.
+
+unsigned const NUM_WALL_KICKS = 5;
+
 #define ENCODE_WALL_KICK(x, y) \
-  ((uint8_t(int(x) << 0) & uint8_t(0b00001111)) | (uint8_t(int(y) << 4) & uint8_t(0b11110000)))
+  ((uint8_t(int8_t(x) << 0) & uint8_t(0b00001111)) | (uint8_t(int8_t(y) << 4) & uint8_t(0b11110000)))
 #define ENCODE_WALL_KICKS(x1,y1, x2,y2, x3,y3, x4,y4) \
-  ((ENCODE_WALL_KICK(x1, y1) << 0) | \
-   (ENCODE_WALL_KICK(x2, y2) << 8) | \
-   (ENCODE_WALL_KICK(x3, y3) << 16) | \
-   (ENCODE_WALL_KICK(x4, y4) << 24))
-uint32_t const OTHER_WALL_KICKS[NUM_ROTATIONS] = {
-  ENCODE_WALL_KICKS(-1,0, -1,+1, 0,-2, -1,-2),
-  ENCODE_WALL_KICKS(+1,0, +1,-1, 0,+2, +1,+2),
-  ENCODE_WALL_KICKS(+1,0, +1,+1, 0,-2, +1,-2),
-  ENCODE_WALL_KICKS(-1,0, -1,-1, 2,+2, -1,+2),
-};
+  (uint32_t((ENCODE_WALL_KICK(x1, y1) << 0) | \
+            (ENCODE_WALL_KICK(x2, y2) << 8) | \
+            (ENCODE_WALL_KICK(x3, y3) << 16) | \
+            (ENCODE_WALL_KICK(x4, y4) << 24)))
+
 uint32_t const I_WALL_KICKS[NUM_ROTATIONS] = {
   ENCODE_WALL_KICKS(-2,0, +1,0, -2,-1, +1,+2),
   ENCODE_WALL_KICKS(-1,0, +2,0, -1,+2, +2,-1),
@@ -89,12 +94,35 @@ uint32_t const I_WALL_KICKS[NUM_ROTATIONS] = {
   ENCODE_WALL_KICKS(+1,0, -2,0, +1,-2, -2,+1),
 };
 
-Row getShapeRow(Shape shape, uint8_t row) {
-  return (shape >> (4 * row)) & 0b1111;
+uint32_t const OTHER_WALL_KICKS[NUM_ROTATIONS] = {
+  ENCODE_WALL_KICKS(-1,0, -1,+1, 0,-2, -1,-2),
+  ENCODE_WALL_KICKS(+1,0, +1,-1, 0,+2, +1,+2),
+  ENCODE_WALL_KICKS(+1,0, +1,+1, 0,-2, +1,-2),
+  ENCODE_WALL_KICKS(-1,0, -1,-1, 0,+2, -1,+2),
+};
+
+inline uint32_t getWallKick(Tetromino tetromino, uint8_t rotation, uint8_t index) {
+  if (index == 0) {
+    return 0;
+  }
+  index--;
+  return ((tetromino == Tetromino::I ? I_WALL_KICKS : OTHER_WALL_KICKS)[rotation] >> (8 * index)) & 0b11111111;
 }
 
-bool getShapePixel(Shape shape, uint8_t row, uint8_t col) {
-  return shape & (1 << (4 * row + col));
+inline int8_t getWallKickX(uint8_t kick, int8_t direction) {
+  int8_t x = kick & 0b00001111;
+  if (kick & 0b00001000) {
+    x |= 0b11110000;
+  }
+  return x * direction;
+}
+
+inline int8_t getWallKickY(uint8_t kick, int8_t direction) {
+  int8_t y = kick >> 4;
+  if (kick & 0b10000000) {
+    y |= 0b11110000;
+  }
+  return y * direction;
 }
 
 uint8_t const MOVE_INTERVAL = 10;
@@ -108,7 +136,7 @@ Bag::Bag()
   nextIndex(NUM_TETROMINOS)
 {
   for (unsigned i = 0; i < NUM_TETROMINOS; i++) {
-    tetrominos[i] = i;
+    tetrominos[i] = Tetromino(i);
   }
 }
 
@@ -123,7 +151,7 @@ Tetromino Bag::getNext() {
 void Bag::shuffle() {
   for (unsigned i = 0; i < NUM_TETROMINOS; i++) {
     unsigned j = random(NUM_TETROMINOS - i);
-    uint8_t tmp = tetrominos[i];
+    Tetromino tmp = tetrominos[i];
     tetrominos[i] = tetrominos[j];
     tetrominos[j] = tmp;
   }
@@ -313,10 +341,29 @@ void Tetris::move(int8_t direction) {
 
 void Tetris::rotate(int8_t direction) {
   eraseTetromino();
+  uint8_t oldRow = currentRow;
+  uint8_t oldCol = currentCol;
+  uint8_t oldRotation = currentRotation;
   currentRotation = (currentRotation + 4 + direction) % 4;
-  if (isBlocked()) {
-    currentRotation = (currentRotation + 4 - direction) % 4;
+  for (int i = 0; i < NUM_WALL_KICKS; i++) {
+    uint8_t kick = getWallKick(currentTetromino, oldRotation, i);
+    int8_t dx = getWallKickX(kick, direction);
+    int8_t dy = getWallKickY(kick, direction);
+    currentRow = oldRow + dy;
+    currentCol = oldCol + dx;
+    // Since these are unsigned, this also checks for underflow.
+    if (currentRow + 4 >= numRows || currentCol + 4 >= numCols) {
+      continue;
+    }
+    if (!isBlocked()) {
+      drawTetromino();
+      return;
+    }
   }
+
+  currentRow = oldRow;
+  currentCol = oldCol;
+  currentRotation = oldRotation;
   drawTetromino();
 }
 
@@ -387,7 +434,7 @@ void Tetris::collapseRow(uint8_t row) {
 }
 
 Shape Tetris::getCurrentShape() const {
-  return SHAPES[currentTetromino][currentRotation];
+  return SHAPES[unsigned(currentTetromino)][currentRotation];
 }
 
 uint8_t Tetris::fallInterval() const {

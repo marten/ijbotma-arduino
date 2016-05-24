@@ -8,10 +8,14 @@
 unsigned const MAX_ROWS = 22;
 
 typedef uint16_t Row;
-typedef uint8_t Tetromino;
 typedef uint16_t Shape;
 
-unsigned const NUM_TETROMINOS = 7;
+enum class Tetromino : uint8_t {
+  I, J, L, O, S, T, Z,
+  COUNT
+};
+
+unsigned const NUM_TETROMINOS = unsigned(Tetromino::COUNT);
 unsigned const NUM_PINS = 14;
 
 enum class TetrisButton : uint8_t {
