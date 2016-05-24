@@ -465,8 +465,9 @@ void Tetris::clearLines() {
       delay(30);
     }
 
-    lines += count;
+    // Compute score at current level, not next level.
     score += SCORE_MULTIPLIERS[count] * getLevel();
+    lines += count;
 
     for (uint8_t row = numRows - 1; row >= 2; row--) {
       if (linesMask & (1 << row)) {
