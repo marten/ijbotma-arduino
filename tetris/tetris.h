@@ -118,8 +118,8 @@ class Tetris {
     bool spawn();
     void drawTetromino();
     void eraseTetromino();
-    void move(int8_t direction);
-    void rotate(int8_t direction);
+    bool move(int8_t direction);
+    bool rotate(int8_t direction);
     bool fall();
     void hardDrop();
     bool isLine(uint8_t row) const;
