@@ -405,7 +405,7 @@ void Tetris::hardDrop() {
 
 void Tetris::clearLines() {
   uint8_t count = 0;
-  uint8_t linesMask = 0;
+  uint32_t linesMask = 0;
   for (uint8_t row = 2; row < numRows; row++) {
     if (isLine(row)) {
       linesMask |= (1 << row);
