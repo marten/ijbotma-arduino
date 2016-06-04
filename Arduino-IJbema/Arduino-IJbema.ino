@@ -68,7 +68,9 @@ void playTetris() {
   Tetris tetris(15, 10, lcd);
   tetris.mapButton(6, TetrisButton::MOVE_LEFT);
   tetris.mapButton(7, TetrisButton::SOFT_DROP);
+  // TODO(marten): Er is ook HARD_DROP
   tetris.mapButton(8, TetrisButton::ROTATE_RIGHT);
+  // TODO(marten): Er is ook ROTATE_LEFT
   tetris.mapButton(9, TetrisButton::MOVE_RIGHT);
   tetris.play();
 }
