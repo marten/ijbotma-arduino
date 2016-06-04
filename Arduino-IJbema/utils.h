@@ -9,17 +9,23 @@
  */
 class InterruptibleDelay {
   public:
-    InterruptibleDelay() : pinBits(0) {}
+    InterruptibleDelay() : pinBits(0), interruptPin(-1) {}
 
     void interruptOnPin(int pin);
 
     /**
-     * If interrupted, returns pin number. If completed, returns -1.
+     * If interrupted, returns true.
      */
-    int operator()(int millis);
+    bool operator()(int millis);
+
+    bool isInterrupted() const { return interruptPin >= 0; }
+    int getInterruptPin() const { return interruptPin; }
+
+    void reset() { interruptPin = -1; }
 
   private:
     uint16_t pinBits;
+    int interruptPin;
 };
 
 #endif

@@ -27,9 +27,7 @@ void shiftLeft(char *buffer, int length) {
 
 }
 
-#define INTERRUPTIBLE_DELAY(millis) { int pin = interruptibleDelay(millis); if (pin >= 0) return pin; }
-
-int Quoter::showRandomQuote() {
+void Quoter::showRandomQuote() {
   int quoteIndex = random(NUM_QUOTES);
   char const *quote = (char const *) pgm_read_word_near(QUOTES + quoteIndex);
   
@@ -46,7 +44,7 @@ int Quoter::showRandomQuote() {
     
     lcd.setCursor(0, 1);
     lcd.print(buffer);
-    INTERRUPTIBLE_DELAY(200);
+    if (interruptibleDelay(200)) return;
 
     quote++;
   }
@@ -56,20 +54,18 @@ int Quoter::showRandomQuote() {
     
     lcd.setCursor(0, 1);
     lcd.print(buffer);
-    INTERRUPTIBLE_DELAY(200);
+    if (interruptibleDelay(200)) return;
   }
 
-  INTERRUPTIBLE_DELAY(500);
+  if (interruptibleDelay(500)) return;
 
   lcd.setCursor(0, 0);
   for (int i = 0; i < LCD_WIDTH; i++) {
     lcd.print(' ');
-    INTERRUPTIBLE_DELAY(20);
+    if (interruptibleDelay(20)) return;
   }
   
   lcd.clear();
-
-  return -1;
 }
 
 #include "quotes.h"

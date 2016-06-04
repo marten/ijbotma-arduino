@@ -67,17 +67,16 @@ void shutDown() {
 }
 
 void loop() {
-  while (true) {
-    int pin = quoter.showRandomQuote();
-    if (pin < 0) {
-      break;
-    } else if (pin == POWER_BUTTON_PIN) {
-      continue;
-    } else {
-      playTetris();
-      break;
-    }
+  interruptibleDelay.reset();
+
+  quoter.showRandomQuote();
+
+  if (!interruptibleDelay.isInterrupted()) {
+    shutDown();
   }
 
-  shutDown();
+  if (interruptibleDelay.getInterruptPin() != POWER_BUTTON_PIN) {
+    playTetris();
+    shutDown();
+  }
 }

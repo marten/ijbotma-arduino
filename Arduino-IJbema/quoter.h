@@ -9,10 +9,7 @@ class Quoter {
     Quoter(LiquidCrystal &lcd, InterruptibleDelay &interruptibleDelay) :
       lcd(lcd), interruptibleDelay(interruptibleDelay) {}
 
-    /**
-     * Returns pin number if interrupted, -1 otherwise.
-     */
-    int showRandomQuote();
+    void showRandomQuote();
 
   private:
     LiquidCrystal &lcd;
