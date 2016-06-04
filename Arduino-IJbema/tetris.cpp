@@ -282,6 +282,7 @@ void Tetris::dropTetromino() {
     if (buttons & TetrisButton::HARD_DROP) {
       hardDrop();
       render();
+      delay(200);
       return;
     }
 
