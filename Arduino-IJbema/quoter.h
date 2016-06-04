@@ -1,15 +1,22 @@
 #ifndef QUOTER_H
 #define QUOTER_H
 
+class InterruptibleDelay;
 class LiquidCrystal;
 
 class Quoter {
   public:
-    Quoter(LiquidCrystal &lcd) : lcd(lcd) {}
-    void showRandomQuote();
+    Quoter(LiquidCrystal &lcd, InterruptibleDelay &interruptibleDelay) :
+      lcd(lcd), interruptibleDelay(interruptibleDelay) {}
+
+    /**
+     * Returns pin number if interrupted, -1 otherwise.
+     */
+    int showRandomQuote();
 
   private:
     LiquidCrystal &lcd;
+    InterruptibleDelay &interruptibleDelay;
 };
 
 #endif

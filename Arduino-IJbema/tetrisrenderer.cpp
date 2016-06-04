@@ -10,6 +10,7 @@ TetrisRenderer::TetrisRenderer(LiquidCrystal &lcd)
 }
 
 void TetrisRenderer::begin() {
+  lcd.clear();
   bitmap.begin();
 }
 

@@ -2,6 +2,7 @@
 
 #include "quotes.h"
 #include "decompress.h"
+#include "utils.h"
 
 #include <Arduino.h>
 #include <LiquidCrystal.h>
@@ -26,7 +27,9 @@ void shiftLeft(char *buffer, int length) {
 
 }
 
-void Quoter::showRandomQuote() {
+#define INTERRUPTIBLE_DELAY(millis) { int pin = interruptibleDelay(millis); if (pin >= 0) return pin; }
+
+int Quoter::showRandomQuote() {
   int quoteIndex = random(NUM_QUOTES);
   char const *quote = (char const *) pgm_read_word_near(QUOTES + quoteIndex);
   
@@ -43,7 +46,7 @@ void Quoter::showRandomQuote() {
     
     lcd.setCursor(0, 1);
     lcd.print(buffer);
-    delay(200);
+    INTERRUPTIBLE_DELAY(200);
 
     quote++;
   }
@@ -53,18 +56,20 @@ void Quoter::showRandomQuote() {
     
     lcd.setCursor(0, 1);
     lcd.print(buffer);
-    delay(200);
+    INTERRUPTIBLE_DELAY(200);
   }
 
-  delay(500);
+  INTERRUPTIBLE_DELAY(500);
 
   lcd.setCursor(0, 0);
   for (int i = 0; i < LCD_WIDTH; i++) {
     lcd.print(' ');
-    delay(20);
+    INTERRUPTIBLE_DELAY(20);
   }
   
   lcd.clear();
+
+  return -1;
 }
 
 #include "quotes.h"
