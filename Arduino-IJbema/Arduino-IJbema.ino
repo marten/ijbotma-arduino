@@ -21,7 +21,7 @@ int const DOWN_BUTTON_PIN = 8;
 int const A_BUTTON_PIN = 10;
 int const B_BUTTON_PIN = 1;
 
-int const POWER_BUTTON_PIN = LEFT_BUTTON_PIN;
+int const POWER_BUTTON_PIN = B_BUTTON_PIN;
 
 void playTetris() {
   Tetris tetris(15, 10, lcd);
