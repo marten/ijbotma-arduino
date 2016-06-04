@@ -54,8 +54,10 @@ def compress(s)
     if c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
       if caps && c >= 'a' && c <= 'z'
         bits += CAPS_OFF
+        caps = false
       elsif !caps && c >= 'A' && c <= 'Z'
         bits += CAPS_ON
+        caps = true
       end
       if c >= 'A' && c <= 'Z'
         n = c.ord - 'A'.ord + 1
