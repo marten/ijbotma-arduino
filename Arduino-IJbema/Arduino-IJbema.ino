@@ -56,10 +56,10 @@ void setup() {
 
   interruptibleDelay.interruptOnPin(LEFT_BUTTON_PIN);
   interruptibleDelay.interruptOnPin(RIGHT_BUTTON_PIN);
-  //interruptibleDelay.interruptOnPin(UP_BUTTON_PIN);
-  //interruptibleDelay.interruptOnPin(DOWN_BUTTON_PIN);
-  //interruptibleDelay.interruptOnPin(A_BUTTON_PIN);
-  //interruptibleDelay.interruptOnPin(B_BUTTON_PIN);
+  interruptibleDelay.interruptOnPin(UP_BUTTON_PIN);
+  interruptibleDelay.interruptOnPin(DOWN_BUTTON_PIN);
+  interruptibleDelay.interruptOnPin(A_BUTTON_PIN);
+  interruptibleDelay.interruptOnPin(B_BUTTON_PIN);
 }
 
 void shutDown() {
