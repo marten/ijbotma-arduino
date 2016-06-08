@@ -10,7 +10,7 @@ class Tetris;
 
 class TetrisRenderer {
   public:
-    TetrisRenderer(LiquidCrystal &lcd);
+    explicit TetrisRenderer(LiquidCrystal &lcd);
 
     void begin();
     void render(Tetris const &tetris);

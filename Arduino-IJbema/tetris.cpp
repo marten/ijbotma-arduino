@@ -80,7 +80,7 @@ bool getShapePixel(Shape shape, uint8_t row, uint8_t col) {
 unsigned const NUM_WALL_KICKS = 5;
 
 #define ENCODE_WALL_KICK(x, y) \
-  ((uint8_t(int8_t(x) << 0) & uint8_t(0b00001111)) | (uint8_t(int8_t(y) << 4) & uint8_t(0b11110000)))
+  uint32_t((uint8_t(int8_t(x) << 0) & uint8_t(0b00001111)) | (uint8_t(int8_t(y) << 4) & uint8_t(0b11110000)))
 #define ENCODE_WALL_KICKS(x1,y1, x2,y2, x3,y3, x4,y4) \
   (uint32_t((ENCODE_WALL_KICK(x1, y1) << 0) | \
             (ENCODE_WALL_KICK(x2, y2) << 8) | \
@@ -167,7 +167,7 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
     numCols(numColsWithoutWalls + 4),
     emptyRow(2 | (1 << (numCols - 2))),
     fullRow(((1 << (numCols - 2)) - 1) << 1),
-    buttonMappings({TetrisButton::NONE}),
+    buttonMappings{TetrisButton::NONE},
     lines(0),
     score(0),
     renderer(lcd)
@@ -397,7 +397,7 @@ bool Tetris::rotate(int8_t direction) {
   currentRotation = (currentRotation + 4 + direction) % 4;
 
   bool success = false;
-  for (int i = 0; i < NUM_WALL_KICKS; i++) {
+  for (unsigned i = 0; i < NUM_WALL_KICKS; i++) {
     uint8_t kick = getWallKick(currentTetromino, oldRotation, i);
     int8_t dx = getWallKickX(kick, direction);
     int8_t dy = getWallKickY(kick, direction);
