@@ -9,7 +9,7 @@ void InterruptibleDelay::interruptOnPin(int pin) {
 bool InterruptibleDelay::operator()(int millis) {
   for (; millis > 0; millis--) {
     for (uint8_t pin = 0; pin <= 13; pin++) {
-      if ((pinBits & (1 << pin)) && digitalRead(pin) == HIGH) {
+      if ((pinBits & (1 << pin)) && buttonReader(pin) == HIGH) {
         interruptPin = pin;
         return true;
       }
