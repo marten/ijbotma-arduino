@@ -97,7 +97,8 @@ STDIN.each do |line|
   uncompressed_size += line.length
   compressed_size += compressed.length
 
-  puts "static char const QUOTE_#{count}[] PROGMEM = {#{compressed.join(',')}};"
+  chars = compressed.map{|c| "(char)#{c}"}.join(", ")
+  puts "static char const QUOTE_#{count}[] PROGMEM = {#{chars}};"
   count += 1
 end
 puts ''
