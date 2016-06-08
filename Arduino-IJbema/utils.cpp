@@ -18,3 +18,12 @@ bool InterruptibleDelay::operator()(int millis) {
   }
   return false;
 }
+
+bool ButtonReader::operator()(int pin) {
+  bool high = digitalRead(pin) == HIGH;
+  if (invertedPinBits & (1 << pin)) {
+    return !high;
+  } else {
+    return high;
+  }
+}

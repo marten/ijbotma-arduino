@@ -1,5 +1,7 @@
 #include "tetris.h"
 
+#include "utils.h"
+
 #include <Arduino.h>
 
 using namespace std;
@@ -161,7 +163,7 @@ void Bag::shuffle() {
   }
 }
 
-Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, LiquidCrystal &lcd)
+Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, ButtonReader &buttonReader, LiquidCrystal &lcd)
   :
     numRows(numVisibleRowsWithoutFloor + 4),
     numCols(numColsWithoutWalls + 4),
@@ -170,6 +172,7 @@ Tetris::Tetris(uint8_t numVisibleRowsWithoutFloor, uint8_t numColsWithoutWalls, 
     buttonMappings{TetrisButton::NONE},
     lines(0),
     score(0),
+    buttonReader(buttonReader),
     renderer(lcd)
 {
   rows[0] = fullRow;
@@ -200,7 +203,7 @@ void Tetris::play() {
 TetrisButton Tetris::readButtons() {
   TetrisButton buttons = TetrisButton::NONE;
   for (unsigned pin = 0; pin < NUM_PINS; pin++) {
-    if (buttonMappings[pin] != TetrisButton::NONE && digitalRead(pin)) {
+    if (buttonMappings[pin] != TetrisButton::NONE && buttonReader(pin)) {
       buttons = buttons | buttonMappings[pin];
     }
   }

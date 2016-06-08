@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+class ButtonReader;
+
 unsigned const MAX_ROWS = 22;
 
 typedef uint16_t Row;
@@ -61,7 +63,7 @@ class Tetris {
      * Standard Tetris is 20 visible rows, 10 columns, but the maximum on our
      * LCD is 15 rows, 18 columns.
      */
-    Tetris(uint8_t numVisibleRows, uint8_t numCols, LiquidCrystal &lcd);
+    Tetris(uint8_t numVisibleRows, uint8_t numCols, ButtonReader &buttonReader, LiquidCrystal &lcd);
 
     /**
      * Sets up a button mapping.
@@ -107,6 +109,7 @@ class Tetris {
     uint8_t currentRow;
     uint8_t currentCol;
 
+    ButtonReader &buttonReader;
     TetrisRenderer renderer;
 
     void dropTetromino();

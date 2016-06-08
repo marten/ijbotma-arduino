@@ -4,9 +4,10 @@
 
 #include <LiquidCrystal.h>
 
+ButtonReader buttonReader;
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-InterruptibleDelay interruptibleDelay;
+InterruptibleDelay interruptibleDelay(buttonReader);
 
 Quoter quoter(lcd, interruptibleDelay);
 
@@ -24,7 +25,7 @@ int const B_BUTTON_PIN = 1;
 int const POWER_BUTTON_PIN = B_BUTTON_PIN;
 
 void playTetris() {
-  Tetris tetris(15, 10, lcd);
+  Tetris tetris(15, 10, buttonReader, lcd);
 
   tetris.mapButton(LEFT_BUTTON_PIN, TetrisButton::MOVE_LEFT);
   tetris.mapButton(RIGHT_BUTTON_PIN, TetrisButton::MOVE_RIGHT);
@@ -37,6 +38,8 @@ void playTetris() {
 }
 
 void setup() {
+  buttonReader.invertPin(POWER_BUTTON_PIN);
+
   // Keep the Arduino on.
   pinMode(POWER_ON_PIN, OUTPUT);
   digitalWrite(POWER_ON_PIN, HIGH);
