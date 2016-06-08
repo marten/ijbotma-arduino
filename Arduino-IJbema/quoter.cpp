@@ -14,7 +14,7 @@ int const LCD_WIDTH = 16;
 
 void fillWithSpaces(char *buffer, int length) {
   buffer[length] = '\0';
-  for (; length >= 0; length--) {
+  for (length--; length >= 0; length--) {
     buffer[length] = ' ';
   }
 }
